@@ -38,54 +38,74 @@
 ## 📱 Ekran Görüntüleri & Uygulama Akışı
 
 ### Ana Menü (Kullanıcıyı Karşılayan Alan)
-![Ana Menü](https://github.com/user-attachments/assets/83256366-e3d9-484a-8211-4f665152757d)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/83256366-e3d9-484a-8211-4f665152757d" alt="Ana Menü" width="250" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</p>
 
 ---
 
 ### Kayıt Ol
-![Kayıt Ol](https://github.com/user-attachments/assets/c8cdd296-f813-42ec-b5a0-32ffe7d89ea9)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/c8cdd296-f813-42ec-b5a0-32ffe7d89ea9" alt="Kayıt Ol" width="250" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</p>
 
 ---
 
 ### Giriş Yap
-![Giriş Yap](https://github.com/user-attachments/assets/577f68af-e06c-4b2f-8f6a-624b9b255800)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/577f68af-e06c-4b2f-8f6a-624b9b255800" alt="Giriş Yap" width="250" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</p>
 
 ---
 
 ### Şifre Değiştirme
-![Şifre Değiştirme](https://github.com/user-attachments/assets/ea34bc37-ee7b-454f-9758-6c74c77b37b2)
-![Şifre Değiştirme](https://github.com/user-attachments/assets/866328e7-5a7f-4e4f-bbcb-ed1318f47041)
-![Şifre Değiştirme](https://github.com/user-attachments/assets/7c7c9787-1b5d-4575-b045-da3985eb7f29)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/ea34bc37-ee7b-454f-9758-6c74c77b37b2" alt="Şifre Değiştirme 1" width="250" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+  <img src="https://github.com/user-attachments/assets/866328e7-5a7f-4e4f-bbcb-ed1318f47041" alt="Şifre Değiştirme 2" width="250" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+  <img src="https://github.com/user-attachments/assets/7c7c9787-1b5d-4575-b045-da3985eb7f29" alt="Şifre Değiştirme 3" width="250" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</p>
 
 ---
 
 ### MQTT Bağlantı Mesajı
-![MQTT](https://github.com/user-attachments/assets/056ef6c3-80e5-4e03-b342-30422715d9f2)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/056ef6c3-80e5-4e03-b342-30422715d9f2" alt="MQTT Bağlantı Mesajı" width="250" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</p>
 
 ---
 
 ### Giriş-Çıkış İşlemleri
-![Giriş-Çıkış](https://github.com/user-attachments/assets/e60a5a36-0b6f-42ac-8790-10e4f71fa7e1)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/e60a5a36-0b6f-42ac-8790-10e4f71fa7e1" alt="Giriş-Çıkış İşlemleri" width="250" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</p>
 
 ---
 
 ### Yönetici Girişi
-![Yönetici Giriş](https://github.com/user-attachments/assets/90bd29d2-466e-4aab-8abf-fb5cb12ffb3a)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/90bd29d2-466e-4aab-8abf-fb5cb12ffb3a" alt="Yönetici Giriş" width="250" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</p>
 
 ---
 
 ### Personel Listeleme (Mobil)
-![Personel Listeleme Mobil](https://github.com/user-attachments/assets/5bbaa535-5b4a-4fc9-91e9-89a9e5af499a)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/5bbaa535-5b4a-4fc9-91e9-89a9e5af499a" alt="Personel Listeleme Mobil" width="250" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</p>
 
 ---
 
 ### JSON Formatında Kullanıcı Listeleme (Mobil)
-![JSON Listeleme](https://github.com/user-attachments/assets/1831fb63-3b3d-4066-bf4e-1132e9a33a25)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/1831fb63-3b3d-4066-bf4e-1132e9a33a25" alt="JSON Listeleme Mobil" width="250" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</p>
 
 ---
 
 ### Personel Listeleme (Masaüstü)
-<img width="2000" height="1125" alt="Masaüstü Personel Listeleme" src="https://github.com/user-attachments/assets/e43f9a0b-08b3-42d1-a248-94c8599a3f54" />
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/e43f9a0b-08b3-42d1-a248-94c8599a3f54" alt="Personel Listeleme Masaüstü" width="500" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</p>
 
 ---
 
