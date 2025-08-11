@@ -1,0 +1,235 @@
+var
+  anaEkranForm: TclForm;
+  pnlContainer: TclProPanel;
+  lblWelcome: TclProLabel;
+  btnLogin, btnRegister, btnMembers, btnQrOkuyucu: TclProButton;
+  MQTT1: TclMQTT;
+  gelenMesaj: string;
+  action, table, id, user_id, checkin_time, checkout_time, kullanici_adi, email, password: string;
+  sql: string;
+  mesaj: string;
+  checkin_location, checkout_location: string;
+  
+void ParseAndApplyMQTTMessage
+{
+  ShowMessage('GELEN MQTT MESAJI: ' + gelenMesaj);
+
+  action = Clomosy.CLParseJSON(gelenMesaj, 'action');
+  table  = Clomosy.CLParseJSON(gelenMesaj, 'table');
+
+  if table == 'users'
+  {
+    kullanici_adi = '';
+    email         = '';
+    password      = '';
+
+    if Pos('"kullanici_adi"', gelenMesaj) > 0
+      kullanici_adi = Clomosy.CLParseJSON(gelenMesaj, 'kullanici_adi');
+    if Pos('"email"', gelenMesaj) > 0
+      email = Clomosy.CLParseJSON(gelenMesaj, 'email');
+    if Pos('"password"', gelenMesaj) > 0
+      password = Clomosy.CLParseJSON(gelenMesaj, 'password');
+
+    if action == 'insert'
+    {
+      sql = 'INSERT OR IGNORE INTO users (kullanici_adi, email, password) VALUES (' +
+            QuotedStr(kullanici_adi) + ', ' + QuotedStr(email) + ', ' + QuotedStr(password) + ')';
+      Clomosy.DBSQLiteQuery.Sql.Text = sql;
+      Clomosy.DBSQLiteQuery.OpenOrExecute;
+      ShowMessage('[MQTT] Kullanıcı eklendi: ' + kullanici_adi + ' / ' + email);
+    }
+    else if action == 'update'
+    {
+      sql = 'UPDATE users SET password = ' + QuotedStr(password) +
+            ' WHERE email = ' + QuotedStr(email);
+      Clomosy.DBSQLiteQuery.Sql.Text = sql;
+      Clomosy.DBSQLiteQuery.OpenOrExecute;
+      ShowMessage('[MQTT] Şifre güncellendi: ' + email);
+    }
+  }
+  else if table == 'checkins'
+  {
+    user_id           = '';
+    checkin_time      = '';
+    checkout_time     = '';
+    checkin_location  = '';
+    checkout_location = '';
+    email             = '';
+    id                = '';
+
+    if Pos('"email"', gelenMesaj) > 0
+      email = Clomosy.CLParseJSON(gelenMesaj, 'email');
+
+    if email <> '' {
+      Clomosy.DBSQLiteQuery.Sql.Text = 'SELECT id FROM users WHERE email = ' + QuotedStr(email);
+      Clomosy.DBSQLiteQuery.OpenOrExecute;
+      if Clomosy.DBSQLiteQuery.Found {
+        user_id = Clomosy.DBSQLiteQuery.FieldByName('id').AsString;
+      }
+      else {
+        ShowMessage('[MQTT] Kullanıcı bulunamadı: ' + email);
+        Exit;
+      }
+    }
+    else if Pos('"user_id"', gelenMesaj) > 0 {
+      user_id = Clomosy.CLParseJSON(gelenMesaj, 'user_id');
+    }
+
+    if Pos('"checkin_time"', gelenMesaj) > 0
+      checkin_time = Clomosy.CLParseJSON(gelenMesaj, 'checkin_time');
+    if Pos('"checkout_time"', gelenMesaj) > 0
+      checkout_time = Clomosy.CLParseJSON(gelenMesaj, 'checkout_time');
+    if Pos('"checkin_location"', gelenMesaj) > 0
+      checkin_location = Clomosy.CLParseJSON(gelenMesaj, 'checkin_location');
+    if Pos('"checkout_location"', gelenMesaj) > 0
+      checkout_location = Clomosy.CLParseJSON(gelenMesaj, 'checkout_location');
+
+    if action == 'insert'
+    {
+      sql = 'INSERT INTO checkins (user_id, checkin_time, checkin_location) VALUES (' +
+            QuotedStr(user_id) + ', ' + QuotedStr(checkin_time) + ', ' + QuotedStr(checkin_location) + ')';
+      Clomosy.DBSQLiteQuery.Sql.Text = sql;
+      Clomosy.DBSQLiteQuery.OpenOrExecute;
+    }
+    else if action == 'update'
+    {
+      sql = 'SELECT id FROM checkins WHERE user_id = ' + QuotedStr(user_id) +
+            ' AND checkin_time = ' + QuotedStr(checkin_time) +
+            ' AND checkin_location = ' + QuotedStr(checkin_location) +
+            ' AND (checkout_time IS NULL OR checkout_time = '''')';
+      Clomosy.DBSQLiteQuery.Sql.Text = sql;
+      Clomosy.DBSQLiteQuery.OpenOrExecute;
+
+      if Clomosy.DBSQLiteQuery.Found {
+        id = Clomosy.DBSQLiteQuery.FieldByName('id').AsString;
+        sql = 'UPDATE checkins SET checkout_time = ' + QuotedStr(checkout_time) +
+              ', checkout_location = ' + QuotedStr(checkout_location) +
+              ' WHERE id = ' + id;
+        Clomosy.DBSQLiteQuery.Sql.Text = sql;
+        Clomosy.DBSQLiteQuery.OpenOrExecute;
+      }
+      else {
+        ShowMessage('[MQTT] GÜNCELLEME BAŞARISIZ: Eşleşen checkin kaydı bulunamadı!');
+      }
+    }
+    else if action == 'delete'
+    {
+      // 1. Öncelik: id ile silme
+      if Pos('"id"', gelenMesaj) > 0
+      {
+        id = Clomosy.CLParseJSON(gelenMesaj, 'id');
+        if id <> '' {
+          sql = 'DELETE FROM checkins WHERE id = ' + id;
+          Clomosy.DBSQLiteQuery.Sql.Text = sql;
+          Clomosy.DBSQLiteQuery.OpenOrExecute;
+          ShowMessage('[MQTT] Kayıt silindi (id): ' + id);
+        }
+      }
+      else
+      {
+        // 2. Öncelik: email + checkin_time + checkin_location ile silme
+        if email <> '' && checkin_time <> '' && checkin_location <> '' && user_id <> '' {
+          sql = 'DELETE FROM checkins WHERE user_id = ' + QuotedStr(user_id) +
+                ' AND checkin_time = ' + QuotedStr(checkin_time) +
+                ' AND checkin_location = ' + QuotedStr(checkin_location);
+          Clomosy.DBSQLiteQuery.Sql.Text = sql;
+          Clomosy.DBSQLiteQuery.OpenOrExecute;
+          ShowMessage('[MQTT] Kayıt silindi: ' + email + ' / ' + checkin_time);
+        } else {
+          ShowMessage('[MQTT] Silme için yeterli veri yok!');
+        }
+      }
+    }
+  }
+}
+
+
+void OnLoginClick;
+{
+  Clomosy.RunUnit('uLogin');
+}
+
+void OnRegisterClick;
+{
+  Clomosy.RunUnit('uRegister');
+}
+
+void OnMembersClick;
+{
+  Clomosy.RunUnit('uAdminLog');
+}
+
+void OnQrOkuyucuClick;
+{
+  if (Clomosy.PlatformIsMobile)
+    ShowMessage('Yalnızca sorumlu ekranda çıkar');
+  else
+    Clomosy.RunUnit('uQrKodu');
+}
+
+void OnMQTTPublishReceived
+{
+  if (MQTT1.ReceivedAlright)
+  {
+    gelenMesaj = MQTT1.ReceivedMessage;
+    ParseAndApplyMQTTMessage;
+  }
+}
+{
+  anaEkranForm = TclForm.Create(Self);
+  anaEkranForm.ClSetCaption('Hoş Geldiniz');
+  anaEkranForm.SetFormColor('#e0f7fa', '#a8e063', clGVertical);
+
+
+  pnlContainer = anaEkranForm.AddNewProPanel(anaEkranForm, 'pnlContainer');
+  pnlContainer.Align = alCenter;
+  pnlContainer.Width = anaEkranForm.clWidth * 0.8;
+  pnlContainer.Height = anaEkranForm.clHeight * 0.6;
+  pnlContainer.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#FFFFFFDD');
+  pnlContainer.clProSettings.BorderWidth = 0;
+  pnlContainer.clProSettings.RoundWidth = 30;
+  pnlContainer.clProSettings.RoundHeight = 30;
+  pnlContainer.SetclProSettings(pnlContainer.clProSettings);
+  
+
+  MQTT1 = anaEkranForm.AddNewMQTTConnection(pnlContainer,'MQTT1');
+  MQTT1.Channel = 'clomosy/qrTakip';
+  MQTT1.Connect;
+  anaEkranForm.AddNewEvent(MQTT1, tbeOnMQTTPublishReceived, 'OnMQTTPublishReceived');
+
+  lblWelcome = anaEkranForm.AddNewProLabel(pnlContainer, 'lblWelcome', 'Qr Giriş-Çıkış Takip Sistemi');
+  lblWelcome.Align = alTop;
+  lblWelcome.Height = 60;
+  lblWelcome.Margins.Top = 20;
+  clComponent.SetupComponent(lblWelcome, '{"TextSize":24,"TextColor":"#388e3c","TextBold":"yes","TextHorizontalAlign":"center"}');
+
+  btnLogin = anaEkranForm.AddNewProButton(pnlContainer, 'btnLogin', 'GİRİŞ YAP');
+  btnLogin.Align = alTop;
+  btnLogin.Height = 50;
+  btnLogin.Margins.Top = 30;
+  clComponent.SetupComponent(btnLogin, '{"BackgroundColor":"#ffffff","TextColor":"#43a047","BorderColor":"#43a047","BorderWidth":2,"RoundWidth":20,"RoundHeight":20,"TextSize":16}');
+  anaEkranForm.AddNewEvent(btnLogin, tbeOnClick, 'OnLoginClick');
+
+  btnRegister = anaEkranForm.AddNewProButton(pnlContainer, 'btnRegister', 'KAYIT OL');
+  btnRegister.Align = alTop;
+  btnRegister.Height = 50;
+  btnRegister.Margins.Top = 15;
+  clComponent.SetupComponent(btnRegister, '{"BackgroundColor":"#ffffff","TextColor":"#43a047","BorderColor":"#43a047","BorderWidth":2,"RoundWidth":20,"RoundHeight":20,"TextSize":16}');
+  anaEkranForm.AddNewEvent(btnRegister, tbeOnClick, 'OnRegisterClick');
+
+  btnQrOkuyucu = anaEkranForm.AddNewProButton(pnlContainer, 'btnQrOkuyucu', 'QR KODU');
+  btnQrOkuyucu.Align = alTop;
+  btnQrOkuyucu.Height = 50;
+  btnQrOkuyucu.Margins.Top = 15;
+  clComponent.SetupComponent(btnQrOkuyucu, '{"BackgroundColor":"#ffffff","TextColor":"#43a047","BorderColor":"#43a047","BorderWidth":2,"RoundWidth":20,"RoundHeight":20,"TextSize":16}');
+  anaEkranForm.AddNewEvent(btnQrOkuyucu, tbeOnClick, 'OnQrOkuyucuClick');
+
+  btnMembers = anaEkranForm.AddNewProButton(pnlContainer, 'btnMembers', 'Personeller');
+  btnMembers.Align = alBottom;
+  btnMembers.Height = 40;
+  btnMembers.Margins.Bottom = 20;
+  clComponent.SetupComponent(btnMembers, '{"BackgroundColor":"#ffffff","TextColor":"#43a047","BorderColor":"#43a047","BorderWidth":2,"RoundWidth":20,"RoundHeight":20,"TextSize":16}');
+  anaEkranForm.AddNewEvent(btnMembers, tbeOnClick, 'OnMembersClick');
+
+  anaEkranForm.Run;
+}
