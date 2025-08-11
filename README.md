@@ -1,0 +1,1 @@
+# QR-Personel-Takip-Uygulamasi-Clomosy
